@@ -60,14 +60,15 @@ public class Main {
 			Email email = new SimpleEmail();
 			email.setHostName("smtp.gmail.com");
 			email.setSmtpPort(465);
-			email.setAuthenticator(new DefaultAuthenticator("<your gmail address>", "<your gmail pw>"));
+			email.setAuthenticator(new DefaultAuthenticator("augustusrutkoskisoftwarevalid@gmail.com", "softwareValid"));
 			//email.setDebug(true);
 			email.setSSLOnConnect(true);
-			email.setFrom("<your gmail address>");
-			email.setSubject("Test Email");
+			email.setFrom("augustusrutkoskisoftwarevalid@gmail.com");
+			email.setSubject("test");
 			email.setMsg("This is a test mail ... :-)");
-			email.addTo("<to email address>");
+			email.addTo("stuskoski@gmail.com");
 			email.send();
+			System.out.println("done");
 			
 		} catch(Exception e) {
 			System.out.println("Ouch: " + e.getMessage());
@@ -78,9 +79,9 @@ public class Main {
 	
 	public static void main(String[] args) {
 
-		//testForReal();
+		testForReal();
 		
-		testWithMock();
+		//testWithMock();
 
 	}
 

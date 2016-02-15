@@ -36,26 +36,216 @@ public class EmailTest {
 			email.setSubject("Test Email");
 			email.setMsg("This is a test mail ... :-)");
 			email.addTo("Stuskoski@yahoo.com");
-			assertFalse(email.send().isEmpty());
+			email.updateContentType(null);
+			email.send();
 		} catch (EmailException e) {
 			fail("Send failed, exception thrown. " + e.getMessage());
 		}
 	}
 
 	/**
-	 * testGetMailSession1
+	 * testGetMailSession1 tests the correct functionality of
+	 * getMailSession().  getMailSession() returns the current
+	 * mail session, and will create one if necessary.  I call
+	 * the function after a valid email session has been started
+	 * and convert the session to a string.  I then check if the 
+	 * String is present with a toString and length > 0 check.
+	 * 
+	 * The test will pass if a session is returned from the 
+	 * function and no exceptions are thrown with the call.
+	 * 
+	 * Test will fail if an exception is thrown.
+	 * 
+	 * Expected result: pass
 	 */
 	@Test
 	public void testGetMailSession1() {
-		fail("Not yet implemented");
+		Email email = new SimpleEmail();
+		email.setHostName("smtp.gmail.com");
+		email.setSmtpPort(465);
+		email.setAuthenticator(new DefaultAuthenticator("augustusrutkoskisoftwarevalid@gmail.com", "softwareValid"));
+		email.setSSLOnConnect(true);
+		try {
+			email.setFrom("augustusrutkoskisoftwarevalid@gmail.com");
+			email.setSubject("Test Email");
+			email.setMsg("This is a test mail ... :-)");
+			email.addTo("Stuskoski@yahoo.com");
+			assertTrue(email.getMailSession().toString().length() > 0);
+			email.send();
+		} catch (EmailException e) {
+			fail("Send failed, exception thrown. " + e.getMessage());
+		}
+	}
+	
+	/**
+	 * testGetMailSession2 will test the exception throwing
+	 * capabilities of the getMailSession() function call.
+	 * According to the documentation, the function will
+	 * throw an EmailException if the host name was not
+	 * set.  
+	 * 
+	 * To replicate the error I will simply not set the 
+	 * host name to "smtp.gmail.com" and check if the
+	 * correct exception is thrown.
+	 * 
+	 * The test will pass if the correct exception is thrown
+	 * and will fail otherwise.
+	 * 
+	 * Expected result: pass, exception thrown.
+	 */
+	@Rule
+	public ExpectedException mailSession = ExpectedException.none();
+	@Test
+	public void testGetMailSession2() throws EmailException{
+		Email email = new SimpleEmail();
+		//email.setHostName("smtp.gmail.com");
+		email.setSmtpPort(465);
+		email.setAuthenticator(new DefaultAuthenticator("augustusrutkoskisoftwarevalid@gmail.com", "softwareValid"));
+		email.setSSLOnConnect(true);
+		email.setFrom("augustusrutkoskisoftwarevalid@gmail.com");
+		email.setSubject("Test Email");
+		email.setMsg("This is a test mail ... :-)");
+		email.addTo("Stuskoski@yahoo.com");
+		mailSession.expect(org.apache.commons.mail.EmailException.class);
+		email.getMailSession();
+		fail("No exception thrown.  Fail!");
+		email.send();
 	}
 
 	/**
-	 * testSetFromString1
+	 * testSetFrom1 will test the correct
+	 * functionality of the setFrom function.
+	 * I will pass a valid email address into
+	 * the function which will be added to the 
+	 * email.  If any exceptions are thrown
+	 * which prevents the email from correctly
+	 * sending the test will fail.
+	 * 
+	 * The test will pass if the email goes through
+	 * and sends correctly.
+	 * 
+	 * Expected result: pass
 	 */
 	@Test
-	public void testSetFromString1() {
-		fail("Not yet implemented");
+	public void testSetFrom1() {
+		Email email = new SimpleEmail();
+		email.setHostName("smtp.gmail.com");
+		email.setSmtpPort(465);
+		email.setAuthenticator(new DefaultAuthenticator("augustusrutkoskisoftwarevalid@gmail.com", "softwareValid"));
+		email.setSSLOnConnect(true);
+		try {
+			email.setFrom("augustusrutkoskisoftwarevalid@gmail.com");
+			email.setSubject("Test Email");
+			email.setMsg("This is a test mail ... :-)");
+			email.addTo("Stuskoski@yahoo.com");
+			assertTrue(email.send().length() > 0);
+		} catch (EmailException e) {
+			fail("Send failed, exception thrown. " + e.getMessage());
+		}
+	}
+	
+	
+	/**
+	 * testSetFrom2 will test the invalid email
+	 * detection of the setFrom class.  I will
+	 * add an invalid email "augustusrutkoskisoftwarevalid@"
+	 * to the function and test for an exception to be 
+	 * thrown.
+	 * 
+	 * The test will pass if an exception is thrown
+	 * and will fail if the email is sent successfully.
+	 * 
+	 * Expected result: pass, exception thrown
+	 * @throws EmailException 
+	 */
+	@Test(expected = EmailException.class)
+	public void testSetFrom2() throws EmailException {
+		Email email = new SimpleEmail();
+		email.setHostName("smtp.gmail.com");
+		email.setSmtpPort(465);
+		email.setAuthenticator(new DefaultAuthenticator("augustusrutkoskisoftwarevalid@gmail.com", "softwareValid"));
+		email.setSSLOnConnect(true);
+		email.setFrom("augustusrutkoskisoftwarevalid@");
+		email.setSubject("Test Email");
+		email.setMsg("This is a test mail ... :-)");
+		email.addTo("Stuskoski@yahoo.com");
+		email.send();
+		fail("Send went through.  Fail!");
+	}
+	
+	/**
+	 * testSetFrom3 will test the case if a programmer
+	 * accidentally calls setFrom() twice in their program.
+	 * I will call setFrom() intially with the valid email
+	 * "augustusrutkoskisoftwarevalid@gmail.com", I will then
+	 * call the function again but with a second valid email
+	 * of "stuskoski@gmail.com"  I will then compare and
+	 * test if no exceptions were thrown as well as which
+	 * email was the sentFrom().
+	 * 
+	 * I believe there will be no exceptions thrown and the
+	 * second email will be email in the setFrom() instead
+	 * of the first.
+	 * 
+	 * Expected result: pass, second email present
+	 */
+	@Test
+	public void testSetFrom3() {
+		Email email = new SimpleEmail();
+		String testEmailAddress = "Stuskoski@gmail.com";
+		email.setHostName("smtp.gmail.com");
+		email.setSmtpPort(465);
+		email.setAuthenticator(new DefaultAuthenticator("augustusrutkoskisoftwarevalid@gmail.com", "softwareValid"));
+		email.setSSLOnConnect(true);
+		try {
+			email.setFrom("augustusrutkoskisoftwarevalid@gmail.com");
+			email.setFrom(testEmailAddress); //2nd call to the function.
+			email.setSubject("Test Email");
+			email.setMsg("This is a test mail ... :-)");
+			email.addTo("Stuskoski@yahoo.com");
+			email.send();
+			assertTrue(email.getFromAddress().toString().equals(testEmailAddress));
+		} catch (EmailException e) {
+			fail("Send failed, exception thrown. " + e.getMessage());
+		}
+	}
+	
+	
+	/**
+	 * testSetFrom4 will expand a little further on the findings of 
+	 * testSetFrom3.  I will put the setFrom is a large loop that will
+	 * constantly change the setFrom address.  Assume all the emails
+	 * changed in the loop are valid. I will then compare the last
+	 * email in setFrom() to what it should be.
+	 * 
+	 * The forloop will simply append a series of numbers to the email
+	 * "Stuskoski@gmail.com".
+	 * 
+	 * The test will pass if the setFrom() email is the correct email
+	 * i.e the last one, and no exceptions were thrown.
+	 * The test will fail otherwise.
+	 * 
+	 * Expected result: pass, email is what is should be.
+	 */
+	@Test
+	public void testSetFrom4() {
+		Email email = new SimpleEmail();
+		email.setHostName("smtp.gmail.com");
+		email.setSmtpPort(465);
+		email.setAuthenticator(new DefaultAuthenticator("augustusrutkoskisoftwarevalid@gmail.com", "softwareValid"));
+		email.setSSLOnConnect(true);
+		try {
+			for(int i=0; i<500; i++){
+				email.setFrom("Stuskoski"+i+"@gmail.com");
+			}
+			email.setSubject("Test Email");
+			email.setMsg("This is a test mail ... :-)");
+			email.addTo("Stuskoski@yahoo.com");
+			email.send();
+			assertTrue(email.getFromAddress().toString().equals("Stuskoski499@gmail.com"));
+		} catch (EmailException e) {
+			fail("Send failed, exception thrown. " + e.getMessage());
+		}
 	}
 
 	/**
