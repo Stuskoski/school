@@ -26,7 +26,20 @@ public class EmailTest {
 	 */
 	@Test
 	public void testUpdateContentType1() {
-		fail("Not yet implemented");
+		Email email = new SimpleEmail();
+		email.setHostName("smtp.gmail.com");
+		email.setSmtpPort(465);
+		email.setAuthenticator(new DefaultAuthenticator("augustusrutkoskisoftwarevalid@gmail.com", "softwareValid"));
+		email.setSSLOnConnect(true);
+		try {
+			email.setFrom("augustusrutkoskisoftwarevalid@gmail.com");
+			email.setSubject("Test Email");
+			email.setMsg("This is a test mail ... :-)");
+			email.addTo("Stuskoski@yahoo.com");
+			assertFalse(email.send().isEmpty());
+		} catch (EmailException e) {
+			fail("Send failed, exception thrown. " + e.getMessage());
+		}
 	}
 
 	/**
