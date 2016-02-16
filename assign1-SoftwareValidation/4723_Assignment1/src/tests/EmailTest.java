@@ -13,6 +13,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email; //for email
@@ -180,6 +181,34 @@ public class EmailTest {
 		} catch (MessagingException e) {
 			fail("Send failed, exception thrown. " + e.getMessage());
 		}
+	}
+	
+	
+	/**
+	 * testUpdateContentType5 is the last test for updateContentType
+	 * and tests the possibility of having an invalid contentType in
+	 * the first half but having a correct charset.
+	 * 
+	 * The test will pass if an exception is thrown.
+	 * The test will fail if an exception is not thrown or in the message
+	 * gets sent.
+	 * 
+	 * Expected result: pass, exception thrown.
+	 */
+	@Test(expected = EmailException.class)
+	public void testUpdateContentType5() throws EmailException{
+		Email email = new SimpleEmail();
+		email.setHostName("smtp.gmail.com");
+		email.setSmtpPort(465);
+		email.setAuthenticator(new DefaultAuthenticator("augustusrutkoskisoftwarevalid@gmail.com", "softwareValid"));
+		email.setSSLOnConnect(true);
+		email.setFrom("augustusrutkoskisoftwarevalid@gmail.com");
+		email.setSubject("Test Email");
+		email.setMsg("This is a test mail ... :-)");
+		email.addTo("Stuskoski@yahoo.com");
+		email.updateContentType("invalidString;charset=UTF-8");
+		email.send();
+		fail("Send went through, no exception thrown.");
 	}
 
 	/**
@@ -876,13 +905,69 @@ public class EmailTest {
 	}
 
 	/**
-	 * testBuildMimeMessage1
+	 * testBuildMimeMessage1 tests the exception throwing capability
+	 * of buildMimeMessage().  Documentation states that if the 
+	 * MimeMessage was already built an IllegalStateException
+	 * will be thrown.
+	 * 
+	 * With the MimeMessage built prior, in this test I will call
+	 * buildMimeMessage() with the intention of purposefully causing
+	 * an IllegalStateException to be thrown.
+	 * 
+	 * The test will pass if the correct exception is thrown.
+	 * The test will fail if the wrong exception is thrown or if
+	 * sending completes with no exceptions being thrown at all.
+	 * 
+	 * Expected result:  Well this one is a bit confusing since
+	 * documentation is vague but I believe the correct exception
+	 * will be thrown. Pass.
 	 */
-	@Test
-	public void testBuildMimeMessage1() {
-		fail("Not yet implemented");
+	@Test(expected = IllegalStateException.class)
+	public void testBuildMimeMessage1() throws EmailException, IllegalStateException{
+		Email email = new SimpleEmail();
+		email.setHostName("smtp.gmail.com");
+		email.setSmtpPort(465);
+		email.setAuthenticator(new DefaultAuthenticator("augustusrutkoskisoftwarevalid@gmail.com", "softwareValid"));
+		email.setSSLOnConnect(true);
+		email.setFrom("augustusrutkoskisoftwarevalid@gmail.com");
+		email.setSubject("Test Email");
+		email.setMsg("This is a test mail ... :-)");
+		email.addTo("Stuskoski@yahoo.com");
+		email.buildMimeMessage();
+		email.send();
+		fail("No exception thrown.");
 	}
-
+	
+	/**
+	 * testBuildMimeMessage2 is meant to test the other exception
+	 * throwing for buildMimeMessage().  This test expects an
+	 * EmailException instead of IllegalStateException.
+	 * I call buildMimeMessage() before any of the email details
+	 * are passed to cause an EmailException to be thrown.
+	 * 
+	 * The test will pass if an EmailException is thrown.
+	 * The test will fail if no exception is thrown or if
+	 * the wrong exception is thrown.
+	 * 
+	 * Expected result: Pass, correct exception thrown.
+	 * @throws EmailException
+	 * @throws IllegalStateException
+	 */
+	@Test(expected = EmailException.class)
+	public void testBuildMimeMessage2() throws EmailException, IllegalStateException{
+		Email email = new SimpleEmail();
+		email.buildMimeMessage();
+		email.setHostName("gmail.com");
+		email.setFrom("Stuskoski@gmail.com");
+		email.setSubject("Test Email");
+		email.setMsg("This is a test mail ... :-)");
+		email.addTo("Stuskoski@yahoo.com");
+		email.send();
+		fail("No exception thrown.");
+	}
+	
+	
+	
 	/**
 	 * testSend1 will test the send function in the Apache Commons Mail.
 	 * Send function will return a string upon success.
@@ -975,6 +1060,41 @@ public class EmailTest {
 			fail("Expected an IllegalStateException to be thrown after 2nd send() was called.");
 		} catch (EmailException e) {
 			System.out.println("testSend3 passed!");
+		}
+	}
+	
+	/**
+	 * testSend4 tests the correct functionality of the
+	 * send() function again but in more detail.
+	 * Send returns the message id of the sent email
+	 * so I simply check if that message id matches the
+	 * actual message id pulled from the email itself.
+	 * 
+	 * The test will pass if the two values match and no
+	 * exceptions are thrown.
+	 * The test will fail if any exception is thrown or
+	 * the message is unable to send.
+	 * 
+	 * Expected result: pass, values will match
+	 * 
+	 * @throws MessagingException
+	 */
+	@Test
+	public void testSend4() {
+		Email email = new SimpleEmail();
+		email.setHostName("smtp.gmail.com");
+		email.setSmtpPort(465);
+		email.setAuthenticator(new DefaultAuthenticator("augustusrutkoskisoftwarevalid@gmail.com", "softwareValid"));
+		email.setSSLOnConnect(true);
+		try {
+			email.setFrom("augustusrutkoskisoftwarevalid@gmail.com");
+			email.setSubject("Test Email");
+			email.setMsg("This is a test mail ... :-)");
+			email.addTo("Stuskoski@yahoo.com");
+			assertTrue(email.send().equals(email.getMimeMessage().getMessageID()));
+			//assertFalse(email.send().isEmpty());
+		} catch (EmailException | MessagingException e) {
+			fail("Send failed, exception thrown. " + e.getMessage());
 		}
 	}
 
@@ -1214,12 +1334,64 @@ public class EmailTest {
 			fail("Send failed, exception thrown. " + e.getMessage());
 		}
 	}
-
+	
 	/**
-	 * testGetSocketConnectionTimeout
+	 * testGetHostName3 tests if getHostName() will
+	 * get the correct host name if multiple set hosts
+	 * are called.
+	 * For this test I will call multiple set host functions
+	 * and eventually call getHostName().  getHostName() should
+	 * return the last hostname set.
+	 * 
+	 * The test will pass if the two values match.
+	 * The test will fail if the two values don't match or
+	 * any exceptions are thrown.
+	 * 
+	 * Expected result: pass, values match
 	 */
 	@Test
-	public void testGetSocketConnectionTimeout() {
+	public void testGetHostName3() {
+		Email email = new SimpleEmail();
+		String host = "smtp.gmail.com";
+		email.setHostName("test1@test.com");
+		email.setHostName("test2@test.com");
+		email.setHostName("test3@test.com");
+		email.setHostName("test4@test.com");
+		email.setHostName("test5@test.com");
+		email.setHostName(host);
+		email.setSmtpPort(465);
+		email.setAuthenticator(new DefaultAuthenticator("augustusrutkoskisoftwarevalid@gmail.com", "softwareValid"));
+		email.setSSLOnConnect(true);
+		try {
+			email.setFrom("augustusrutkoskisoftwarevalid@gmail.com");
+			email.setSubject("Test Email");
+			email.setMsg("This is a test mail ... :-)");
+			email.addTo("Stuskoski@yahoo.com");
+			email.send();
+			assertTrue(email.getHostName() == host);
+			//System.out.println(email.getHostName());
+		} catch (EmailException e) {
+			fail("Send failed, exception thrown. " + e.getMessage());
+		}
+	}
+
+	/**
+	 * testGetSocketConnectionTimeout1 tests the general functionality
+	 * of getSocketConnectionTimeout().  The function is a simple getter
+	 * that returns the timeout of the socket as an int.
+	 * This test will check that the return value is an integer.
+	 * I cast the original value to Integer since int->Integer
+	 * and assertTrue that it is an instanceof Integer.
+	 * 
+	 * The test will pass as long as some int is returned with
+	 * the function call and will fail otherwise or if some
+	 * exception is thrown during execution.
+	 * 
+	 * Expected result: pass, function will return an int that
+	 * is casted to an Integer
+	 */
+	@Test
+	public void testGetSocketConnectionTimeout1() {
 		Mailbox.clearAll();
         try {
         	Email email = new SimpleEmail();
@@ -1228,7 +1400,74 @@ public class EmailTest {
         	email.setSubject("Test Email");
         	email.setMsg("This is a test mail ... :-)");
         	email.addTo("Stuskoski@yahoo.com");
-        	System.out.println(email.getSocketConnectionTimeout());
+        	assertTrue((Integer)email.getSocketConnectionTimeout() instanceof java.lang.Integer);
+        	email.send();
+		} catch(Exception e) {
+			fail("Exception thrown. "+ e.getMessage());
+		}
+	}
+	
+	/**
+	 * testGetSocketConnectionTimeout2 tests the default value 
+	 * set for socket timeouts.  According to the documentation
+	 * the default time set is 60 seconds but the function returns
+	 * the int value in terms of milliseconds:
+	 * 60sec = 60000ms
+	 * 
+	 * The test will pass if the int passed back after the function
+	 * call is 60000 and none else.
+	 * The test will fail if the default value is not 60000ms or if
+	 * any exceptions arise during execution.
+	 * 
+	 * Expected result: Pass, default value is 60000 since socketTimeout
+	 * is not set anywhere else.
+	 */
+	@Test
+	public void testGetSocketConnectionTimeout2() {
+		Mailbox.clearAll();
+        try {
+        	Email email = new SimpleEmail();
+        	email.setHostName("gmail.com");
+        	email.setFrom("Stuskoski@gmail.com");
+        	email.setSubject("Test Email");
+        	email.setMsg("This is a test mail ... :-)");
+        	email.addTo("Stuskoski@yahoo.com");
+        	assertTrue(email.getSocketConnectionTimeout() == 60000);
+        	email.send();
+		} catch(Exception e) {
+			fail("Exception thrown. "+ e.getMessage());
+		}
+	}
+	
+	
+	/**
+	 * testGetSocketConnectionTimeout3 tests the correct functionality
+	 * of getSocketConnectionTimeout() again but in a different way.
+	 * In this test I set a socket timeout with setSocketConnectionTimeout
+	 * with the variable int testMS = 10000.
+	 * I then test if getSocketConnectionTimeout() returns the same value
+	 * testMS and assertTrue.
+	 * 
+	 * The test will pass if the timeout time was set and returned in the
+	 * same condition.
+	 * The test fails if the two values are not equal and if any exceptions
+	 * are thrown during execution.
+	 * 
+	 * Expected result: pass, the two values will match after the set and get.
+	 */
+	@Test
+	public void testGetSocketConnectionTimeout3() {
+		Mailbox.clearAll();
+        try {
+        	int testMS = 10000;
+        	Email email = new SimpleEmail();
+        	email.setHostName("gmail.com");
+        	email.setFrom("Stuskoski@gmail.com");
+        	email.setSubject("Test Email");
+        	email.setMsg("This is a test mail ... :-)");
+        	email.addTo("Stuskoski@yahoo.com");
+        	email.setSocketConnectionTimeout(testMS);
+        	assertTrue(email.getSocketConnectionTimeout() == testMS);
         	email.send();
 		} catch(Exception e) {
 			fail("Exception thrown. "+ e.getMessage());
