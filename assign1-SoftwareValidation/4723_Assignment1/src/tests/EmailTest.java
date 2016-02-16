@@ -706,11 +706,173 @@ public class EmailTest {
 	}
 
 	/**
-	 * testAddHeader1
+	 * testAddHeader1 tests the correct functionality of testAddHeader().
+	 * I pass a valid name, value to the function to correctly add
+	 * the header to the email.
+	 * I then send the email and wait for it in the inbox.  Once the email
+	 * has arrived, I use getHeader(name) for the email and check if it is
+	 * not null.
+	 * 
+	 * The test will pass as long as the value returned from getHeader(name) 
+	 * is not null meaning that a header was found in the email.  The function
+	 * returns null if no header is found.
+	 * The test will fail if no header is found or if any exceptions are
+	 * thrown during execution.
+	 * 
+	 * Expected result: Pass, header correctly added.
 	 */
 	@Test
 	public void testAddHeader1() {
-		fail("Not yet implemented");
+		Mailbox.clearAll();
+		String valueTest = "Stuskoski@gmail.com";
+    	String nameTest = "Augustus";
+        try {
+        	
+        	Email email = new SimpleEmail();
+        	email.setHostName("gmail.com");
+        	email.setFrom("Stuskoski@gmail.com");
+        	email.setSubject("Test Email");
+        	email.setMsg("This is a test mail ... :-)");
+        	email.addTo("Stuskoski@yahoo.com");
+        	email.addHeader(nameTest, valueTest); //test
+        	email.send();
+		} catch(Exception e) {
+			fail("Exception thrown. "+ e.getMessage());
+		}
+
+        try {
+			List<Message> inbox = Mailbox.get("Stuskoski@yahoo.com");
+			
+			//if inbox size is 0 then the email did not send correctly
+			//or was not received correctly
+			if(inbox.size() > 0) {
+				assertTrue(inbox.get(0).getHeader(nameTest) != null);
+			}else{
+				fail("Msg not sent/received");
+			}
+		} catch (Exception e) {
+			fail("Exception thrown. "+ e.getMessage());
+		}
+	}
+	
+	
+	/**
+	 * testAddHeader2 tests the exception throwing capabilities
+	 * of the addHeader() function call.  According to the documentation
+	 * an IllegalArguementException is thrown if either name or value is 
+	 * null or empty. (All cases tested further down)
+	 * For this test I will only add one null in the name value.
+	 * 
+	 * The test will pass if the expected exception is thrown.
+	 * Will fail if no exception is thrown.
+	 * 
+	 * Expected result: pass, exception thrown correctly.
+	 * @throws EmailException 
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void testAddHeader2() throws EmailException,  IllegalArgumentException{
+		Mailbox.clearAll();
+		String nameTest = null;
+		String valueTest = "Stuskoski@gmail.com"; 	
+        	Email email = new SimpleEmail();
+        	email.setHostName("gmail.com");
+        	email.setFrom("Stuskoski@gmail.com");
+        	email.setSubject("Test Email");
+        	email.setMsg("This is a test mail ... :-)");
+        	email.addTo("Stuskoski@yahoo.com");
+        	email.addHeader(nameTest, valueTest); //test
+        	email.send();
+	}
+	
+	/**
+	 * testAddHeader3 tests the exception throwing of
+	 * the addHeader() function.
+	 * Documentation states an IllegalArgumentException
+	 * is thrown if name or value is either null or
+	 * empty in addHeader().
+	 * 
+	 * For this test I test if name being empty
+	 * will throw the correct exception.
+	 * 
+	 * The test will pass if the correct exception is thrown
+	 * and will fail if otherwise.
+	 * 
+	 * Expected result: Pass, IllegalArgumentException thrown
+	 * 
+	 * @throws EmailException
+	 * @throws IllegalArgumentException
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void testAddHeader3() throws EmailException,  IllegalArgumentException{
+		Mailbox.clearAll();
+		String nameTest = "";
+		String valueTest = "Stuskoski@gmail.com"; 	
+        	Email email = new SimpleEmail();
+        	email.setHostName("gmail.com");
+        	email.setFrom("Stuskoski@gmail.com");
+        	email.setSubject("Test Email");
+        	email.setMsg("This is a test mail ... :-)");
+        	email.addTo("Stuskoski@yahoo.com");
+        	email.addHeader(nameTest, valueTest); //test
+        	email.send();
+	}
+	
+	/**
+	 * testAddHeader4() tests one of the last two remaining
+	 * value cases leftover for the addHeader() function.
+	 * 
+	 * This test will see if the correct exception is thrown
+	 * if the value variable is null.
+	 * 
+	 * Test will pass if IllegalArgumentException is thrown
+	 * and will fail otherwise.
+	 * 
+	 * Expected result: 
+	 * @throws EmailException
+	 * @throws IllegalArgumentException
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void testAddHeader4() throws EmailException,  IllegalArgumentException{
+		Mailbox.clearAll();
+		String nameTest = "Augustus";
+		String valueTest = null; 	
+        	Email email = new SimpleEmail();
+        	email.setHostName("gmail.com");
+        	email.setFrom("Stuskoski@gmail.com");
+        	email.setSubject("Test Email");
+        	email.setMsg("This is a test mail ... :-)");
+        	email.addTo("Stuskoski@yahoo.com");
+        	email.addHeader(nameTest, valueTest); //test
+        	email.send();
+	}
+	
+	
+	/**
+	 * testAddHeader5 the last of the tests for addHeader().
+	 * This test will check the last value case for addHeader()
+	 * in which value will be an empty string.
+	 * 
+	 * The test passes if the correct exception is thrown
+	 * (IllegalArgumentException) and will fail if any
+	 * other case happens.
+	 * 
+	 * Expected result: Pass, IllegalArgumentException thrown.
+	 * @throws EmailException
+	 * @throws IllegalArgumentException
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void testAddHeader5() throws EmailException,  IllegalArgumentException{
+		Mailbox.clearAll();
+		String nameTest = "Augustus";
+		String valueTest = ""; 	
+        	Email email = new SimpleEmail();
+        	email.setHostName("gmail.com");
+        	email.setFrom("Stuskoski@gmail.com");
+        	email.setSubject("Test Email");
+        	email.setMsg("This is a test mail ... :-)");
+        	email.addTo("Stuskoski@yahoo.com");
+        	email.addHeader(nameTest, valueTest); //test
+        	email.send();
 	}
 
 	/**
@@ -934,12 +1096,12 @@ public class EmailTest {
 	 * Expected result: pass
 	 */
 	@Test
-	public void testGetSentDate3() {
+	public void testGetSentDate3() { //////////////////////////////////////////////////////////////////////////////////////////////////////////
 		Mailbox.clearAll();
 		
 		try {
 			
-			for(int i=0; i<5000; i++){
+			for(int i=0; i<5; i++){//5000
 				Email email = new SimpleEmail();
 	        	email.setHostName("gmail.com");
 	        	email.setFrom("Stuskoski@gmail.com");
@@ -958,7 +1120,7 @@ public class EmailTest {
 			//if inbox size is 0 then the email did not send correctly
 			//or was not received correctly
 			if(inbox.size() > 0) {
-				for(int i=0; i<5000; i++){
+				for(int i=0; i<5; i++){//5000
 					inbox.get(i).getSentDate();
 					/**
 					 * System.out is commented out now.
@@ -1058,7 +1220,19 @@ public class EmailTest {
 	 */
 	@Test
 	public void testGetSocketConnectionTimeout() {
-		fail("Not yet implemented");
+		Mailbox.clearAll();
+        try {
+        	Email email = new SimpleEmail();
+        	email.setHostName("gmail.com");
+        	email.setFrom("Stuskoski@gmail.com");
+        	email.setSubject("Test Email");
+        	email.setMsg("This is a test mail ... :-)");
+        	email.addTo("Stuskoski@yahoo.com");
+        	System.out.println(email.getSocketConnectionTimeout());
+        	email.send();
+		} catch(Exception e) {
+			fail("Exception thrown. "+ e.getMessage());
+		}
 	}
 
 }
