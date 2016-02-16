@@ -22,7 +22,19 @@ import org.jvnet.mock_javamail.Mailbox;
 public class EmailTest {
 
 	/**
-	 * testUpdateContentType1
+	 * testUpdateContentType1 tests the correct functionality
+	 * of updateContentType().  To change the content type of
+	 * the email, the updateContentType() function is used.
+	 * 
+	 * I pass the valid String parameter "text/html" into the
+	 * function to change the content type.
+	 * 
+	 * The test will pass if no exceptions are thrown and send
+	 * completes successfully.
+	 * The test will fail if any exceptions are thrown causing
+	 * the send to fail.
+	 * 
+	 * Expected result: pass, valid parameter passed.
 	 */
 	@Test
 	public void testUpdateContentType1() {
@@ -36,7 +48,99 @@ public class EmailTest {
 			email.setSubject("Test Email");
 			email.setMsg("This is a test mail ... :-)");
 			email.addTo("Stuskoski@yahoo.com");
-			email.updateContentType(null);
+			email.updateContentType("text/html");
+			email.send();
+		} catch (EmailException e) {
+			fail("Send failed, exception thrown. " + e.getMessage());
+		}
+	}
+	
+	
+	/**
+	 * testUpdateContentType2 expands a bit further
+	 * than our previous test testUpdateContentType1.
+	 * In addition to setting the content type I also
+	 * send a charset with the string into the function
+	 * updateContentType().
+	 * i.e updateContentType("text/html;charset=UTF-8")
+	 * 
+	 * The test will pass with the similar requirements
+	 * as the previous test.  The test will pass if no
+	 * exceptions are thrown and if send() completes
+	 * successfully.
+	 * The test will fail if any exception is thrown
+	 * interruption completion of the method.
+	 * 
+	 * Expected result: pass, valid string passed
+	 */
+	@Test
+	public void testUpdateContentType2() {
+		Email email = new SimpleEmail();
+		email.setHostName("smtp.gmail.com");
+		email.setSmtpPort(465);
+		email.setAuthenticator(new DefaultAuthenticator("augustusrutkoskisoftwarevalid@gmail.com", "softwareValid"));
+		email.setSSLOnConnect(true);
+		try {
+			email.setFrom("augustusrutkoskisoftwarevalid@gmail.com");
+			email.setSubject("Test Email");
+			email.setMsg("This is a test mail ... :-)");
+			email.addTo("Stuskoski@yahoo.com");
+			email.updateContentType("text/html;charset=UTF-8");
+			email.send();
+		} catch (EmailException e) {
+			fail("Send failed, exception thrown. " + e.getMessage());
+		}
+	}
+	
+	
+	/**
+	 * testUpdateContentType3 tests the possibility of sending
+	 * an invalid string in the function updateContentType().
+	 * 
+	 * There are a list of valid Strings to pass into the function
+	 * found via Google, I pass a String that is not listed anywhere.
+	 * 
+	 * The test will pass as long as the correct exception is thrown,
+	 * i.e sending failed.
+	 * The test will fail if send() completes in which a fail() will
+	 * be executed.
+	 * 
+	 * Expected result: Test will pass, exception is thrown due to incorrect
+	 * String.
+	 * @throws EmailException 
+	 */
+	@Test(expected = EmailException.class)
+	public void testUpdateContentType3() throws EmailException {
+		Email email = new SimpleEmail();
+		email.setHostName("smtp.gmail.com");
+		email.setSmtpPort(465);
+		email.setAuthenticator(new DefaultAuthenticator("augustusrutkoskisoftwarevalid@gmail.com", "softwareValid"));
+		email.setSSLOnConnect(true);
+		email.setFrom("augustusrutkoskisoftwarevalid@gmail.com");
+		email.setSubject("Test Email");
+		email.setMsg("This is a test mail ... :-)");
+		email.addTo("Stuskoski@yahoo.com");
+		email.updateContentType("invalidString");
+		email.send();
+		fail("Send completed, no exception thrown.");
+
+	}
+	
+	
+	@Test
+	public void testUpdateContentType4() {
+		Email email = new SimpleEmail();
+		email.setHostName("smtp.gmail.com");
+		email.setSmtpPort(465);
+		email.setAuthenticator(new DefaultAuthenticator("augustusrutkoskisoftwarevalid@gmail.com", "softwareValid"));
+		email.setSSLOnConnect(true);
+		try {
+			email.setFrom("augustusrutkoskisoftwarevalid@gmail.com");
+			email.setSubject("Test Email");
+			email.setMsg("This is a test mail ... :-)");
+			email.addTo("Stuskoski@yahoo.com");
+			email.updateContentType("text/html;charset=UTF-8");
+			email.updateContentType("application/zip");
 			email.send();
 		} catch (EmailException e) {
 			fail("Send failed, exception thrown. " + e.getMessage());
