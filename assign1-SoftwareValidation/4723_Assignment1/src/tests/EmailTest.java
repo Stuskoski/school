@@ -279,6 +279,41 @@ public class EmailTest {
 		fail("No exception thrown.  Fail!");
 		email.send();
 	}
+	
+	/**
+	 * testGetMailSession3 tests the correct functionality of getMailSession()
+	 * but in an attempt to break it.  With this test multiple calls to 
+	 * getMailSession() are called to make sure no exceptions are thrown.
+	 * This test makes sure getMailSession() is not altering any information
+	 * that will prevent further calls to getMailSession() from executing correctly.
+	 * 
+	 * The test will pass if all goes well and execution completes with no
+	 * exceptions thrown.
+	 * The test will fail if any exceptions are thrown.
+	 * 
+	 * Expected result: pass, multiple calls to getMailSession() are fine to do.
+	 */
+	@Test
+	public void testGetMailSession3() {
+		Email email = new SimpleEmail();
+		email.setHostName("smtp.gmail.com");
+		email.setSmtpPort(465);
+		email.setAuthenticator(new DefaultAuthenticator("augustusrutkoskisoftwarevalid@gmail.com", "softwareValid"));
+		email.setSSLOnConnect(true);
+		try {
+			email.setFrom("augustusrutkoskisoftwarevalid@gmail.com");
+			email.setSubject("Test Email");
+			email.setMsg("This is a test mail ... :-)");
+			email.addTo("Stuskoski@yahoo.com");
+			email.getMailSession();
+			email.getMailSession();
+			email.getMailSession();
+			email.getMailSession();
+			email.send();
+		} catch (EmailException e) {
+			fail("Send failed, exception thrown. " + e.getMessage());
+		}
+	}
 
 	/**
 	 * testSetFrom1 will test the correct
