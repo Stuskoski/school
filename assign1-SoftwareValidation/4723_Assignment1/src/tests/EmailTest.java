@@ -12,6 +12,7 @@ import org.junit.rules.ExpectedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email; //for email
@@ -127,8 +128,32 @@ public class EmailTest {
 	}
 	
 	
+	/**
+	 * testUpdateContentType4 tests the possibility of
+	 * having someone forgetting to remove previous
+	 * declarations of updateContentType() in their
+	 * program.  For this test I have 4 calls to 
+	 * updateContentType, each with a different valid
+	 * String passed through:
+	 * 
+	 * "text/html;charset=UTF-8"
+	 * "application/zip"
+	 * "image/gif"
+	 * "application/pdf"
+	 * 
+	 * I then go further to retrieve the email from the
+	 * mailbox and check it's Content Type.  I believe
+	 * the last call will be the correct Content Type so 
+	 * that is the one I check against.
+	 * 
+	 * If any exceptions are thrown the test fails.
+	 * The test will pass if no exceptions are thrown,
+	 * email is sent correctly, and the Content Type
+	 * matches the last call to updateContentType().
+	 */
 	@Test
 	public void testUpdateContentType4() {
+		Mailbox.clearAll();
 		Email email = new SimpleEmail();
 		email.setHostName("smtp.gmail.com");
 		email.setSmtpPort(465);
@@ -141,8 +166,18 @@ public class EmailTest {
 			email.addTo("Stuskoski@yahoo.com");
 			email.updateContentType("text/html;charset=UTF-8");
 			email.updateContentType("application/zip");
+			email.updateContentType("image/gif");
+			email.updateContentType("application/pdf");
 			email.send();
+			
+			List<Message> inbox = Mailbox.get("Stuskoski@yahoo.com");
+			assertTrue(inbox.get(0).getContentType().equals("application/pdf"));
+			
 		} catch (EmailException e) {
+			fail("Send failed, exception thrown. " + e.getMessage());
+		} catch (AddressException e) {
+			fail("Send failed, exception thrown. " + e.getMessage());
+		} catch (MessagingException e) {
 			fail("Send failed, exception thrown. " + e.getMessage());
 		}
 	}
@@ -577,11 +612,53 @@ public class EmailTest {
 	}
 
 	/**
-	 * testAddReplyTo1
+	 * testAddReplyTo1 will test the correct usage of 
+	 * the function addReplyTo().  I pass a valid email 
+	 * address:
+	 * "Stuskoski@gmail.com"
+	 * to the function which will be added as a reply 
+	 * address to the email contents.
+	 * 
+	 * The test will pass if all goes well and no errors
+	 * are thrown. I also test if the correct email address
+	 * is on the replyTo list by reading the email and
+	 * checking the property. 
+	 * The test will fail if the sending fails or if any
+	 * exceptions are thrown during execution.
+	 * 
+	 * I expect the test to pass with no exceptions thown.
 	 */
 	@Test
 	public void testAddReplyTo1() {
-		fail("Not yet implemented");
+		Mailbox.clearAll();
+        try {
+        	String emailTest = "Stuskoski@gmail.com";
+        	Email email = new SimpleEmail();
+        	email.setHostName("gmail.com");
+        	email.setFrom("Stuskoski@gmail.com");
+        	email.setSubject("Test Email");
+        	email.setMsg("This is a test mail ... :-)");
+        	email.addTo("Stuskoski@yahoo.com");
+        	email.addReplyTo(emailTest);
+        	assertTrue(email.getReplyToAddresses().get(0).toString().equals(emailTest));
+        	email.send();
+		} catch(Exception e) {
+			fail("Exception thrown. "+ e.getMessage());
+		}
+
+        try {
+			List<Message> inbox = Mailbox.get("Stuskoski@yahoo.com");
+			
+			//if inbox size is 0 then the email did not send correctly
+			//or was not received correctly
+			if(inbox.size() > 0) {
+				//do nothing
+			}else{
+				fail("Msg not sent/received");
+			}
+		} catch (Exception e) {
+			fail("Exception thrown. "+ e.getMessage());
+		}
 	}
 
 	/**
