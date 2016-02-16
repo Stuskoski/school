@@ -615,13 +615,14 @@ public class EmailTest {
 	 * testAddReplyTo1 will test the correct usage of 
 	 * the function addReplyTo().  I pass a valid email 
 	 * address:
-	 * "Stuskoski@gmail.com"
+	 * "Stuskoski@gmail.com" and a valid name:
+	 * "Augustus"
 	 * to the function which will be added as a reply 
 	 * address to the email contents.
 	 * 
 	 * The test will pass if all goes well and no errors
-	 * are thrown. I also test if the correct email address
-	 * is on the replyTo list by reading the email and
+	 * are thrown. I also test if the correct email address/name
+	 * are on the replyTo list by reading the email and
 	 * checking the property. 
 	 * The test will fail if the sending fails or if any
 	 * exceptions are thrown during execution.
@@ -633,14 +634,15 @@ public class EmailTest {
 		Mailbox.clearAll();
         try {
         	String emailTest = "Stuskoski@gmail.com";
+        	String nameTest = "Augustus";
         	Email email = new SimpleEmail();
         	email.setHostName("gmail.com");
         	email.setFrom("Stuskoski@gmail.com");
         	email.setSubject("Test Email");
         	email.setMsg("This is a test mail ... :-)");
         	email.addTo("Stuskoski@yahoo.com");
-        	email.addReplyTo(emailTest);
-        	assertTrue(email.getReplyToAddresses().get(0).toString().equals(emailTest));
+        	email.addReplyTo(emailTest, nameTest);
+        	assertTrue(email.getReplyToAddresses().get(0).toString().equals(nameTest+" <"+emailTest+">"));
         	email.send();
 		} catch(Exception e) {
 			fail("Exception thrown. "+ e.getMessage());
@@ -658,6 +660,48 @@ public class EmailTest {
 			}
 		} catch (Exception e) {
 			fail("Exception thrown. "+ e.getMessage());
+		}
+	}
+	
+	/**
+	 * testAddReplyTo2 will test the exception throwing
+	 * capability of addReplyTo().  In the documentation,
+	 * it states that the function will throw an EmailException
+	 * with an incorrect email address.
+	 * 
+	 * I pass an invalid email address:
+	 * "Stuskoski"
+	 * to the function to test if an exception is thrown.
+	 * 
+	 * The test will pass if the correct exception is thrown.
+	 * The test will fail if the send goes through and no
+	 * exceptions are thrown during execution.
+	 * 
+	 * Expected Result: Pass, exception thrown
+	 */
+	@Test(expected = EmailException.class)
+	public void testAddReplyTo2() throws EmailException{
+		Mailbox.clearAll();
+        	String emailTest = "Stuskoski";
+        	Email email = new SimpleEmail();
+        	email.setHostName("gmail.com");
+        	email.setFrom("Stuskoski@gmail.com");
+        	email.setSubject("Test Email");
+        	email.setMsg("This is a test mail ... :-)");
+        	email.addTo("Stuskoski@yahoo.com");
+        	email.addReplyTo(emailTest);
+        	email.send();
+        	fail("No exception thrown, send went through.");
+        try {
+			List<Message> inbox = Mailbox.get("Stuskoski@yahoo.com");
+			
+			//if inbox size is 0 then the email did not send correctly
+			//or was not received correctly
+			if(inbox.size() > 0) {
+				//do nothing
+			}
+		} catch (Exception e) {
+			fail("Wrong exception thrown. "+ e.getMessage());
 		}
 	}
 
