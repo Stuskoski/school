@@ -21,6 +21,69 @@ import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.jvnet.mock_javamail.Mailbox;
 
+/**
+ * TEST PLAN
+ * @author Augustus Rutkoski - jkj449
+ * CS 4723 Software Validation
+ * Assignment1 40 test cases for Apache Mail
+ * 
+ * In-depth explanation of each test case available above the methods
+ * 
+ * Test ID						Quick Description						Inputs
+ * -----------------------------------------------------------------------------------------------------------------
+ *testUpdateContentType1			correct functionality						"text/html"
+ *testUpdateContentType2			correct functionality w/ charset			"text/html;charset=UTF-8"
+ *testUpdateContentType3			invalid input								"invalidString"
+ *testUpdateContentType4			multiple calls								"text/html;charset=UTF-8","application/zip","image/gif","application/pdf"
+ *testUpdateContentType5			invalid type/valid charset					"invalidString;charset=UTF-8"
+ *
+ *testGetMailSession1				correct functionality						n/a
+ *testGetMailSession2				exception throwing							n/a
+ *testGetMailSession3				multiple calls								n/a
+ *		
+ *testSetFrom1						correct functionality						"augustusrutkoskisoftwarevalid@gmail.com"
+ *testSetFrom2						invalid input								"augustusrutkoskisoftwarevalid@"
+ *testSetFrom3						multiple calls/inputs						"augustusrutkoskisoftwarevalid@gmail.com","stuskoski@gmail.com"
+ *testSetFrom4						large # of calls/validation					"Stuskoski@gmail.com[0-499]"
+ *
+ *testAddCc1						correct functionality						array{"Stuskoski@yahoo.com", "Stusdaboss@yahoo.com", "Stuskoski@gmail.com"}
+ *testAddCc2						exception throwing							array{"Stuskoski@yahoo.com", "Stusdabossyahoo.com", "Stuskoskigmail"}
+ *testAddCc3						large # of emails							array{"Stuskoski"+[0-99]+"@yahoo.com"}
+ *
+ *testAddBcc1						correct functionality						array{"Stuskoski@yahoo.com", "Stusdaboss@yahoo.com", "Stuskoski@gmail.com"}
+ *testAddBcc2						exception throwing							array{"Stuskoski@yahoo.com", "Stusdaboss@yahoo.com", "Stuskoskigmail.com"}
+ *testAddBcc3						large # of emails							array{"Stuskoski"+[0-99]+"@yahoo.com"}
+ *
+ *testAddReplyTo1					correct functionality						emailTest = "Stuskoski@gmail.com";  nameTest = "Augustus";
+ *testAddReplyTo2					exception throwing							emailTest = "Stuskoski";  nameTest = "Augustus";
+ *
+ *testAddHeader1					correct functionality						valueTest = "Stuskoski@gmail.com"; nameTest = "Augustus";
+ *testAddHeader2					exception throwing							nameTest = null;  valueTest = "Stuskoski@gmail.com"; 	
+ *testAddHeader3					exception throwing							nameTest = "";  valueTest = "Stuskoski@gmail.com"; 
+ *testAddHeader4					exception throwing							nameTest = "Augustus";  valueTest = null; 	
+ *testAddHeader5					exception throwing							nameTest = "Augustus";  valueTest = ""; 	
+ *	
+ *testBuildMimeMessage1				exception(IllegalStateException)			n/a
+ *testBuildMimeMessage2				exception(EmailException)					n/a 
+ *
+ *testSend1							correct functionality						n/a
+ *testSend2							exception(EmailException)					n/a	
+ *testSend3							exception(IllegalStateException)			n/a
+ *testSend4							correct functionality(more detail)			n/a
+ *
+ *testGetSentDate1					correct functionality						n/a
+ *testGetSentDate2					exception throwing							n/a
+ *testGetSentDate3					large # of emails(5000)						n/a
+ *
+ *testGetHostName1					correct functionality						n/a
+ *testGetHostName2					correct functionality(more detail)			n/a
+ *testGetHostName3					multiple calls/validation					n/a
+ *
+ *testGetSocketConnectionTimeout1	correct functionality/validation			n/a
+ *testGetSocketConnectionTimeout2	correct functionality(default value)		n/a
+ *testGetSocketConnectionTimeout3	correct functionality(value set/validated)	n/a
+ *	
+ */
 public class EmailTest {
 
 	/**
@@ -380,7 +443,7 @@ public class EmailTest {
 	 * testSetFrom3 will test the case if a programmer
 	 * accidentally calls setFrom() twice in their program.
 	 * I will call setFrom() intially with the valid email
-	 * "augustusrutkoskisoftwarevalid@gmail.com", I will then
+	 * "augustusrutkoskisoftwarevalid@gmail.com", I will then 
 	 * call the function again but with a second valid email
 	 * of "stuskoski@gmail.com"  I will then compare and
 	 * test if no exceptions were thrown as well as which
@@ -747,13 +810,14 @@ public class EmailTest {
 	public void testAddReplyTo2() throws EmailException{
 		Mailbox.clearAll();
         	String emailTest = "Stuskoski";
+        	String nameTest = "Augustus";
         	Email email = new SimpleEmail();
         	email.setHostName("gmail.com");
         	email.setFrom("Stuskoski@gmail.com");
         	email.setSubject("Test Email");
         	email.setMsg("This is a test mail ... :-)");
         	email.addTo("Stuskoski@yahoo.com");
-        	email.addReplyTo(emailTest);
+        	email.addReplyTo(emailTest, nameTest);
         	email.send();
         	fail("No exception thrown, send went through.");
         try {
@@ -1251,12 +1315,12 @@ public class EmailTest {
 	 * Expected result: pass
 	 */
 	@Test
-	public void testGetSentDate3() { //////////////////////////////////////////////////////////////////////////////////////////////////////////
+	public void testGetSentDate3() { 
 		Mailbox.clearAll();
 		
 		try {
 			
-			for(int i=0; i<5; i++){//5000
+			for(int i=0; i<5000; i++){//5000
 				Email email = new SimpleEmail();
 	        	email.setHostName("gmail.com");
 	        	email.setFrom("Stuskoski@gmail.com");
@@ -1275,7 +1339,7 @@ public class EmailTest {
 			//if inbox size is 0 then the email did not send correctly
 			//or was not received correctly
 			if(inbox.size() > 0) {
-				for(int i=0; i<5; i++){//5000
+				for(int i=0; i<5000; i++){//5000
 					inbox.get(i).getSentDate();
 					/**
 					 * System.out is commented out now.
@@ -1321,7 +1385,7 @@ public class EmailTest {
 			email.setMsg("This is a test mail ... :-)");
 			email.addTo("Stuskoski@yahoo.com");
 			email.send();
-			assertTrue(email.getHostName() == "smtp.gmail.com");
+			assertTrue(email.getHostName().length() > 0);
 			//System.out.println(email.getHostName());
 		} catch (EmailException e) {
 			fail("Send failed, exception thrown. " + e.getMessage());
